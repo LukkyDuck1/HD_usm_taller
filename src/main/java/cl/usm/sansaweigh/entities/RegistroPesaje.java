@@ -2,6 +2,7 @@ package cl.usm.sansaweigh.entities;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
@@ -20,8 +21,12 @@ public class RegistroPesaje implements Serializable {
 
     private Integer balanzaId;
     private String paqueteId;
-    //TODO: peso expresado en Sansas (1 Sansa = 1.337 kg)
-    private double peso;
+
+    @Transient
+    private Double pesoKg; // peso de entrada en kg, no se guarda
+
+    private Double pesoSansas;
+
     private CategoriaPeso categoria;
     private EstadoPesaje estado;
 
