@@ -107,4 +107,23 @@ class RegistroPesajeControllerTest {
                 .andExpect(jsonPath("$[0].id").value("abc123"))
                 .andExpect(jsonPath("$[0].categoria").value("LIVIANO"));
     }
+
+    @Test
+    void create_errorInterno_retorna500() throws Exception {
+        when(registroPesajeService.create(any())).thenThrow(new RuntimeException("falla"));
+
+        mockMvc.perform(post("/registros")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"balanzaId\":2,\"paqueteId\":\"PKG-1\",\"pesoKg\":5.5}"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void getByDate_errorInterno_retorna500() throws Exception {
+        when(registroPesajeService.getByDate(any())).thenThrow(new RuntimeException("falla"));
+
+        mockMvc.perform(get("/registros")
+                        .param("fecha", "2026-06-28"))
+                .andExpect(status().isInternalServerError());
+    }
 }
