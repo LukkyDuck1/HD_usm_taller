@@ -187,4 +187,19 @@ class RegistroPesajeServiceImplTest {
         verify(repository).findByCreatedAtBetween(
                 fecha.atStartOfDay(), fecha.atTime(23, 59, 59));
     }
+
+    @Test
+    void updateEstado_transicionPesadoAprobado() {
+        RegistroPesaje r = new RegistroPesaje();
+        r.setId("2");
+        r.setEstado(EstadoPesaje.PESADO);
+        r.setCategoria(CategoriaPeso.LIVIANO);
+        when(repository.findById("2")).thenReturn(Optional.of(r));
+        when(repository.save(any(RegistroPesaje.class))).thenAnswer(i -> i.getArgument(0));
+
+        Optional<RegistroPesaje> res = service.updateEstado("2", EstadoPesaje.APROBADO);
+
+        assertThat(res).isPresent();
+        assertThat(res.get().getEstado()).isEqualTo(EstadoPesaje.APROBADO);
+    }
 }
