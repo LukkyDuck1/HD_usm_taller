@@ -126,4 +126,12 @@ class RegistroPesajeControllerTest {
                         .param("fecha", "2026-06-28"))
                 .andExpect(status().isInternalServerError());
     }
+
+    @Test
+    void updateEstado_estadoInvalido_retorna400() throws Exception {
+        mockMvc.perform(put("/registros/abc123/estado")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"estado\":\"NOEXISTE\"}"))
+                .andExpect(status().isBadRequest());
+    }
 }
