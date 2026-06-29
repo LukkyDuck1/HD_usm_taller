@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -34,15 +35,18 @@ public class RegistroPesajeController {
     }
 
     @PutMapping("/{id}/estado")
-    public ResponseEntity<?> updateEstado(@PathVariable String id, @RequestParam EstadoPesaje estado) {
+    public ResponseEntity<?> updateEstado(@PathVariable String id, @RequestBody Map<String, String> body) {
         try {
-            Optional<RegistroPesaje> res = this.registroPesajeService.updateEstado(id, estado);
+            EstadoPesaje nuevoEstado = EstadoPesaje.valueOf(body.get("estado"));
+            Optional<RegistroPesaje> res = this.registroPesajeService.updateEstado(id, nuevoEstado);
             if (res.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.ok(res.get());
         } catch (IllegalWeighingStateException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body("Estado invalido: " + body.get("estado"));
         } catch (Exception ex) {
             return ResponseEntity.internalServerError().build();
         }
