@@ -1,3 +1,8 @@
+Taller desarrollado por:
+Patricio Pereira  
+Magno Rodriguez  
+Isaac Arias
+
 # SansaWeigh
 
 Microservicio de estaciones de pesaje de paquetes (Spring Boot).
