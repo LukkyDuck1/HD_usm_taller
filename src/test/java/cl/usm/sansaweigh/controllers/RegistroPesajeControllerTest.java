@@ -5,10 +5,9 @@ import cl.usm.sansaweigh.entities.EstadoPesaje;
 import cl.usm.sansaweigh.entities.RegistroPesaje;
 import cl.usm.sansaweigh.exceptions.IllegalWeighingStateException;
 import cl.usm.sansaweigh.services.RegistroPesajeService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -16,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -33,9 +31,6 @@ class RegistroPesajeControllerTest {
 
     @MockitoBean
     private RegistroPesajeService registroPesajeService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private RegistroPesaje registroEjemplo() {
         RegistroPesaje r = new RegistroPesaje();
@@ -55,15 +50,11 @@ class RegistroPesajeControllerTest {
         RegistroPesaje registro = registroEjemplo();
         when(registroPesajeService.create(any())).thenReturn(registro);
 
-        Map<String, Object> body = Map.of(
-                "balanzaId", 2,
-                "paqueteId", "PKG-001",
-                "pesoKg", 5.5
-        );
+        String body = "{\"balanzaId\":2,\"paqueteId\":\"PKG-001\",\"pesoKg\":5.5}";
 
         mockMvc.perform(post("/registros")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(body)))
+                        .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("abc123"))
                 .andExpect(jsonPath("$.estado").value("INGRESADO"));
@@ -74,15 +65,11 @@ class RegistroPesajeControllerTest {
         when(registroPesajeService.create(any()))
                 .thenThrow(new IllegalWeighingStateException("No se permite procesar paquetes Pesados en horario nocturno."));
 
-        Map<String, Object> body = Map.of(
-                "balanzaId", 2,
-                "paqueteId", "PKG-002",
-                "pesoKg", 100.0
-        );
+        String body = "{\"balanzaId\":2,\"paqueteId\":\"PKG-002\",\"pesoKg\":100.0}";
 
         mockMvc.perform(post("/registros")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(body)))
+                        .content(body))
                 .andExpect(status().isBadRequest());
     }
 
@@ -91,11 +78,9 @@ class RegistroPesajeControllerTest {
         when(registroPesajeService.updateEstado(eq("noexiste"), any()))
                 .thenReturn(Optional.empty());
 
-        Map<String, String> body = Map.of("estado", "PESADO");
-
         mockMvc.perform(put("/registros/noexiste/estado")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(body)))
+                        .content("{\"estado\":\"PESADO\"}"))
                 .andExpect(status().isNotFound());
     }
 
@@ -104,11 +89,9 @@ class RegistroPesajeControllerTest {
         when(registroPesajeService.updateEstado(eq("abc123"), eq(EstadoPesaje.DESPACHADO)))
                 .thenThrow(new IllegalWeighingStateException("Transicion de estado no permitida: INGRESADO -> DESPACHADO."));
 
-        Map<String, String> body = Map.of("estado", "DESPACHADO");
-
         mockMvc.perform(put("/registros/abc123/estado")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(body)))
+                        .content("{\"estado\":\"DESPACHADO\"}"))
                 .andExpect(status().isBadRequest());
     }
 
